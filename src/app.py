@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 import requests
 import csv, re, json
+from sqlalchemy import text
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/data_eng_challenge'
@@ -158,6 +159,37 @@ def create_job_batch():
     return jobs_schema.jsonify(new_jobs)
   except Exception as e:
     print(f"Error: ", e)
+
+@app.route('/employees-jobs-quarters', methods=['GET'])
+def get_employees_jobs_quarters():
+  t = text("""SET @FirstQ = 0;
+  SET @SecondQ = 0;
+  SET @ThirdQ = 0;
+  SET @FourthQ = 0;
+
+  SET @FirstQ = (select count(*) from  data_eng_challenge.hired__employees he, data_eng_challenge.departments d, data_eng_challenge.jobs j where he.department_id = d.id and he.job_id = j.id and ROUND((month(he.datetime)+3)/4) LIKE 1);
+  SET @SecondQ = (select count(*) from  data_eng_challenge.hired__employees he, data_eng_challenge.departments d, data_eng_challenge.jobs j where he.department_id = d.id and he.job_id = j.id and ROUND((month(he.datetime)+3)/4) LIKE 2);
+  SET @ThirdQ = (select count(*) from  data_eng_challenge.hired__employees he, data_eng_challenge.departments d, data_eng_challenge.jobs j where he.department_id = d.id and he.job_id = j.id and ROUND((month(he.datetime)+3)/4) LIKE 3);
+  SET @FourthQ = (select count(*) from  data_eng_challenge.hired__employees he, data_eng_challenge.departments d, data_eng_challenge.jobs j where he.department_id = d.id and he.job_id = j.id and ROUND((month(he.datetime)+3)/4) LIKE 4);
+
+  select 
+    d.name as Department, 
+      d.job as Job,
+    @FirstQ as Q1,
+    @SecondQ as Q2,
+    @ThirdQ as Q3,
+    @FourthQ as Q4
+  from  
+    data_eng_challenge.hired__employees he,
+      data_eng_challenge.departments d,
+      data_eng_challenge.jobs j
+  where
+    he.department_id = d.id and
+      he.job_id = j.id
+
+  """)
+  result = db.session.execute(t)
+  return jsonify(result)
 
 
 if __name__=='__main__':
