@@ -45,3 +45,9 @@ At this point, each .AVRO file made in the previous point is imported, then it i
 
 ## Challenge #2
 
+### Ponit 1 
+First start the REST API by running the following command
+```bash
+python src\app.py
+```
+And then run, in the navigator the follow url: /employees-jobs-quarters
