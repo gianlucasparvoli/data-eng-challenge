@@ -1,6 +1,6 @@
 # Challenge Data 
 ## Introduction
-This repository is destinated to  solve the data engineer challenge at Globant.
+This repository is destinated to  solve the data engineer challenge.
 
 ## Installation
 
